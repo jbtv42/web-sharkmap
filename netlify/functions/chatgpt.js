@@ -1,9 +1,8 @@
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 exports.handler = async function (event, context) {
   if (event.httpMethod !== "POST") {
@@ -15,7 +14,8 @@ exports.handler = async function (event, context) {
 
   try {
     const body = JSON.parse(event.body);
-    const chat = await openai.createChatCompletion({
+
+    const chat = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         { role: "system", content: "You are a fun shark expert who answers user questions about sharks." },
@@ -25,9 +25,10 @@ exports.handler = async function (event, context) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ reply: chat.data.choices[0].message.content }),
+      body: JSON.stringify({ reply: chat.choices[0].message.content }),
     };
   } catch (err) {
+    console.error("Function error:", err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message }),
